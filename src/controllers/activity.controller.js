@@ -12,24 +12,25 @@ const getActivity = (req, res, next) => {
     .catch((error) => {
       res.status(500).send({ message: "Error getting activity" });
     });
-}
+};
 
 const createActivity = async (req, res, next) => {
   try {
     const { countries, name, difficulty, duration, season } = req.body;
     name.toLowerCase();
     if (name && difficulty && duration && season) {
-      const newActivity = await Activity.create({
-        name,
-        difficulty,
-        duration,
-        season,
+      countries.forEach(async (country) => {
+        const newActivity = await Activity.create({
+          name,
+          difficulty,
+          duration,
+          season,
+        });
+        const countryActivity = await Country.findByPk(country);
+        countryActivity.addActivity(newActivity);
       });
-      countries.map(
-        async (country) =>
-          await newActivity.addCountries(await Country.findByPk(country))
-      );
-      res.status(201).send(newActivity);
+
+      res.status(201).send({ message: "Activity created successfully" });
     } else {
       return res.status(400).send({ message: "Missing fields" });
     }
@@ -40,50 +41,49 @@ const createActivity = async (req, res, next) => {
 
 const updateActivity = (req, res, next) => {
   const { id } = req.params;
-  console.log("Soy el id", id)
+  console.log("Soy el id", id);
   const { name, difficulty, duration, season } = req.body;
   parseInt(difficulty);
   parseInt(duration);
   name.toLowerCase();
-  const activityDetail = Activity.findByPk(id)
-  console.log(difficulty, "de BACKEND")
-  
-  activityDetail.then(activity =>{
-    activity.update({
-      name,
-      difficulty,
-      duration,
-      season,
+  const activityDetail = Activity.findByPk(id);
+  console.log(difficulty, "de BACKEND");
+
+  activityDetail
+    .then((activity) => {
+      activity.update({
+        name,
+        difficulty,
+        duration,
+        season,
+      });
     })
-  }).then(() => {
-    res.status(200).send({message: "Activity updated successfully"});
-  }).catch(error => {
-    res.status(500).send({ message: "Error updating activity", error });
-  })
+    .then(() => {
+      res.status(200).send({ message: "Activity updated successfully" });
+    })
+    .catch((error) => {
+      res.status(500).send({ message: "Error updating activity", error });
+    });
 };
 
 const getActivityDetails = (req, res, next) => {
   let { id } = req.params;
   id = parseInt(id);
-    if (id) {
-      let activity = Activity.findByPk(id);
-      activity
-        .then((response) => {
-          if (!response) {
-            return res.status(404).send({ message: "Activity not found" });
-          } else {
-            return res.status(200).send(response);
-          }
-        })
-        .catch((error) =>
-          res.send({ message: "Error getting activity", error })
-        );
-    } else {
+  if (id) {
+    let activity = Activity.findByPk(id);
+    activity
+      .then((response) => {
+        if (!response) {
+          return res.status(404).send({ message: "Activity not found" });
+        } else {
+          return res.status(200).send(response);
+        }
+      })
+      .catch((error) => res.send({ message: "Error getting activity", error }));
+  } else {
     res.status(400).send({ message: "Invalid country id" });
   }
 };
-
-
 
 const deleteActivity = (req, res, next) => {
   const { id } = req.params;
@@ -105,5 +105,5 @@ module.exports = {
   updateActivity,
   deleteActivity,
   getActivity,
-  getActivityDetails
+  getActivityDetails,
 };
