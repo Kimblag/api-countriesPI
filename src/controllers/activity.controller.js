@@ -41,13 +41,11 @@ const createActivity = async (req, res, next) => {
 
 const updateActivity = (req, res, next) => {
   const { id } = req.params;
-  console.log("Soy el id", id);
   const { name, difficulty, duration, season } = req.body;
+
   parseInt(difficulty);
-  parseInt(duration);
-  name.toLowerCase();
+
   const activityDetail = Activity.findByPk(id);
-  console.log(difficulty, "de BACKEND");
 
   activityDetail
     .then((activity) => {
@@ -69,6 +67,7 @@ const updateActivity = (req, res, next) => {
 const getActivityDetails = (req, res, next) => {
   let { id } = req.params;
   id = parseInt(id);
+
   if (id) {
     let activity = Activity.findByPk(id);
     activity
@@ -87,6 +86,7 @@ const getActivityDetails = (req, res, next) => {
 
 const deleteActivity = (req, res, next) => {
   const { id } = req.params;
+  
   Activity.destroy({
     where: {
       id,
